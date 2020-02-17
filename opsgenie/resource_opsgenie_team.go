@@ -30,24 +30,26 @@ func resourceOpsGenieTeam() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"member": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
+			/*
+				"member": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"id": {
+								Type:     schema.TypeString,
+								Required: true,
+							},
 
-						"role": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "user",
+							"role": {
+								Type:     schema.TypeString,
+								Optional: true,
+								Default:  "user",
+							},
 						},
 					},
 				},
-			},
+			*/
 		},
 	}
 }
@@ -59,11 +61,18 @@ func resourceOpsGenieTeamCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
+	defaultAdmins := []team.Member{
+		{User: team.User{ID: "fc39c6d9-f35f-4781-a6d4-572ab1b7de6f"}, Role: "admin"}, // DL
+		{User: team.User{ID: "c0d38b59-9ee1-4cd3-8832-6d4a767ffa8c"}, Role: "admin"}, // FA
+		{User: team.User{ID: "4fb3f0f6-cf25-4471-9de9-7e418a1108f7"}, Role: "admin"}, // JS
+		{User: team.User{ID: "80f50465-462e-4b5d-bd65-0fdd16e51fcd"}, Role: "admin"}, // CG
+	}
 
 	createRequest := &team.CreateTeamRequest{
 		Name:        name,
 		Description: description,
-		Members:     expandOpsGenieTeamMembers(d),
+		//Members:     expandOpsGenieTeamMembers(d),
+		Members: defaultAdmins,
 	}
 
 	log.Printf("[INFO] Creating OpsGenie team '%s'", name)
@@ -106,7 +115,7 @@ func resourceOpsGenieTeamRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("name", getResponse.Name)
 	d.Set("description", getResponse.Description)
-	d.Set("member", flattenOpsGenieTeamMembers(getResponse.Members))
+	//d.Set("member", flattenOpsGenieTeamMembers(getResponse.Members))
 
 	return nil
 }
@@ -123,7 +132,7 @@ func resourceOpsGenieTeamUpdate(d *schema.ResourceData, meta interface{}) error 
 		Id:          d.Id(),
 		Name:        name,
 		Description: description,
-		Members:     expandOpsGenieTeamMembers(d),
+		//Members:     expandOpsGenieTeamMembers(d),
 	}
 
 	log.Printf("[INFO] Updating OpsGenie team '%s'", name)
